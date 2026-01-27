@@ -1,8 +1,10 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { UserRepository, UserInfoRepository } from '../common/repositories';
 import { UserDto, CreateUserDto } from './dto';
 import { plainToInstance } from 'class-transformer';
 import { Transactional } from 'typeorm-transactional';
+import { BusinessException } from '../common/exceptions';
+import { BusinessErrorCodes } from '../common/constants';
 
 @Injectable()
 export class UserService {
@@ -22,7 +24,12 @@ export class UserService {
 
   async getById(id: number): Promise<UserDto> {
     const user = await this.userRepo.findById(id);
-    if (!user) throw new NotFoundException('User not found');
+    if (!user) {
+      throw new BusinessException(
+        BusinessErrorCodes.NOT_FOUND,
+        `ユーザー（ID: ${id}）が見つかりませんでした`,
+      );
+    }
     return plainToInstance(UserDto, user, { excludeExtraneousValues: true });
   }
 

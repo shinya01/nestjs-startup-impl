@@ -1,8 +1,10 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ArticleRepository, UserRepository } from '../common/repositories';
 import { ArticleDto, CreateArticleDto } from './dto';
 import { plainToInstance } from 'class-transformer';
 import { Transactional } from 'typeorm-transactional';
+import { BusinessException } from '../common/exceptions';
+import { BusinessErrorCodes } from '../common/constants';
 
 @Injectable()
 export class ArticleService {
@@ -25,8 +27,12 @@ export class ArticleService {
   @Transactional()
   async create(data: CreateArticleDto): Promise<ArticleDto> {
     const author = await this.userRepo.findById(data.authorId);
-    if (!author) throw new NotFoundException('Author not found');
-
+    if (!author) {
+      throw new BusinessException(
+        BusinessErrorCodes.NOT_FOUND,
+        `著者（ID: ${data.authorId}）が見つかりませんでした`,
+      );
+    }
     const article = await this.articleRepo.save({
       title: data.title,
       content: data.content,

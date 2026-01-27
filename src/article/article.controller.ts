@@ -2,9 +2,11 @@ import { Controller, Get, Post, Body, Logger } from '@nestjs/common';
 import { ArticleService } from './article.service';
 import { CreateArticleDto, ArticleDto } from './dto';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiErrorResponses } from '../common/decorators';
 
 @ApiTags('Articles')
 @Controller('articles')
+@ApiErrorResponses()
 export class ArticleController {
   private readonly logger = new Logger(ArticleController.name);
 

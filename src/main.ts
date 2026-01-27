@@ -9,6 +9,8 @@ import {
   initializeTransactionalContext,
   StorageDriver,
 } from 'typeorm-transactional';
+import { HttpExceptionFilter } from './common/filters';
+import { ErrorResponseDto } from './common/swagger';
 
 async function bootstrap() {
   // トランザクションコンテキストの初期化（最優先で実行）
@@ -25,6 +27,9 @@ async function bootstrap() {
     }),
   );
 
+  // 共通例外フィルターをグローバルに適用
+  app.useGlobalFilters(new HttpExceptionFilter());
+
   const configService = app.get(ConfigService);
 
   const swaggerConfig = new DocumentBuilder()
@@ -32,7 +37,9 @@ async function bootstrap() {
     .setDescription(configService.get<string>('swagger.description') || '')
     .setVersion(configService.get<string>('swagger.version') || '1.0.0')
     .build();
-  const document = SwaggerModule.createDocument(app, swaggerConfig);
+  const document = SwaggerModule.createDocument(app, swaggerConfig, {
+    extraModels: [ErrorResponseDto], // 追加モデルを登録
+  });
   if (configService.get('app.env') !== 'production') {
     SwaggerModule.setup('swagger', app, document);
   }
