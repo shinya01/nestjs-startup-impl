@@ -3,6 +3,11 @@ export const configuration = () => ({
     env: process.env.NODE_ENV || 'development',
     port: parseInt(process.env.PORT || '3000', 10),
   },
+  swagger: {
+    title: process.env.SWAGGER_TITLE,
+    description: process.env.SWAGGER_DESCRIPTION,
+    version: process.env.SWAGGER_VERSION,
+  },
   database: {
     host: process.env.DB_HOST,
     port: parseInt(process.env.DB_PORT || '5432', 10),
