@@ -1,11 +1,14 @@
-// src/app.module.ts
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LoggerModule } from 'nestjs-pino';
+import { DataSource } from 'typeorm';
+import { addTransactionalDataSource } from 'typeorm-transactional';
 import { configuration, validationSchema } from './config';
 import { ENTITIES } from './common/entities';
 import { CommonModule } from './common/common.module';
+import { UserModule } from './user/user.module';
+import { ArticleModule } from './article/article.module';
 
 @Module({
   imports: [
@@ -28,14 +31,19 @@ import { CommonModule } from './common/common.module';
         logging: config.get('app.env') !== 'production',
         synchronize: false,
       }),
+      // トランザクションを有効化するための DataSource 生成フロー
+      dataSourceFactory: async (options) => {
+        if (!options) throw new Error('Invalid options passed');
+        const dataSource = new DataSource(options);
+        await dataSource.initialize();
+        return addTransactionalDataSource(dataSource);
+      },
       inject: [ConfigService],
     }),
-    // Logger の設定を非同期で読み込む
     LoggerModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (config: ConfigService) => ({
         pinoHttp: {
-          // 本番環境は info 以上、開発環境は debug 以上のログを出力
           level: config.get('app.env') === 'production' ? 'info' : 'debug',
           transport:
             config.get('app.env') !== 'production'
@@ -53,6 +61,8 @@ import { CommonModule } from './common/common.module';
       inject: [ConfigService],
     }),
     CommonModule,
+    UserModule,
+    ArticleModule,
   ],
 })
 export class AppModule {}
