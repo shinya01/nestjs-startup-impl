@@ -5,6 +5,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LoggerModule } from 'nestjs-pino';
 import { configuration, validationSchema } from './config';
 import { ENTITIES } from './common/entities';
+import { CommonModule } from './common/common.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { ENTITIES } from './common/entities';
       }),
       inject: [ConfigService],
     }),
+    CommonModule,
   ],
 })
 export class AppModule {}
