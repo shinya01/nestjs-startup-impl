@@ -40,6 +40,15 @@ async function bootstrap() {
     .setTitle(configService.get<string>('swagger.title') || 'NestJS API')
     .setDescription(configService.get<string>('swagger.description') || '')
     .setVersion(configService.get<string>('swagger.version') || '1.0.0')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        description: 'アクセストークンを入力してください',
+      },
+      'access-token',
+    )
     .build();
   const document = SwaggerModule.createDocument(app, swaggerConfig, {
     extraModels: [SuccessResponseDto, ErrorResponseDto], // 追加モデルを登録
