@@ -1,12 +1,20 @@
-import { Controller, Get, Post, Body, Logger } from '@nestjs/common';
+import { Controller, Get, Post, Body, Logger, UseGuards } from '@nestjs/common';
 import { ArticleService } from './article.service';
 import { CreateArticleDto, ArticleDto } from './dto';
-import { ApiTags, ApiOperation, ApiBody } from '@nestjs/swagger';
-import { ApiErrorResponses, ApiSuccessResponse } from '../common/decorators';
+import { ApiTags, ApiOperation, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiAuthErrorResponses,
+  ApiErrorResponses,
+  ApiSuccessResponse,
+} from '../common/decorators';
+import { CognitoAuthGuard } from '../auth/guards';
 
 @ApiTags('Articles')
 @Controller('articles')
 @ApiErrorResponses()
+@ApiBearerAuth('access-token')
+@UseGuards(CognitoAuthGuard)
+@ApiAuthErrorResponses()
 export class ArticleController {
   private readonly logger = new Logger(ArticleController.name);
 

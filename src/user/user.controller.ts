@@ -1,12 +1,34 @@
-import { Controller, Get, Post, Param, Body, Logger } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Param,
+  Body,
+  Logger,
+  UseGuards,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto, UserDto } from './dto';
-import { ApiTags, ApiOperation, ApiParam, ApiBody } from '@nestjs/swagger';
-import { ApiErrorResponses, ApiSuccessResponse } from '../common/decorators';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiParam,
+  ApiBody,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
+import {
+  ApiAuthErrorResponses,
+  ApiErrorResponses,
+  ApiSuccessResponse,
+} from '../common/decorators';
+import { CognitoAuthGuard } from 'src/auth/guards';
 
 @ApiTags('Users')
 @Controller('users')
 @ApiErrorResponses()
+@ApiBearerAuth('access-token')
+@UseGuards(CognitoAuthGuard)
+@ApiAuthErrorResponses()
 export class UserController {
   private readonly logger = new Logger(UserController.name);
 
