@@ -31,7 +31,7 @@ export class UserRepository {
 
   findByExternalId(externalId: string): Promise<User | null> {
     return this.repo.findOne({
-      where: { email: externalId }, // externalId で検索
+      where: { externalId }, // externalId で検索
       relations: ['info'],
     });
   }
