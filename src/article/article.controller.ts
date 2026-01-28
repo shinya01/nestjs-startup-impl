@@ -7,13 +7,13 @@ import {
   ApiErrorResponses,
   ApiSuccessResponse,
 } from '../common/decorators';
-import { CognitoAuthGuard } from '../auth/guards';
+import { Auth0AuthGuard } from '../auth/guards';
 
 @ApiTags('Articles')
 @Controller('articles')
 @ApiErrorResponses()
 @ApiBearerAuth('access-token')
-@UseGuards(CognitoAuthGuard)
+@UseGuards(Auth0AuthGuard)
 @ApiAuthErrorResponses()
 export class ArticleController {
   private readonly logger = new Logger(ArticleController.name);
