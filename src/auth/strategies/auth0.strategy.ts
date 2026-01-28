@@ -1,5 +1,5 @@
 // src/auth/strategies/auth0.strategy.ts
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy as JwtStrategyBase } from 'passport-jwt';
 import * as jwksRsa from 'jwks-rsa';
@@ -9,6 +9,8 @@ import { InvalidTokenException } from '../exceptions';
 import { AuthUser } from '../types';
 import { UserDto } from '../../user/dto';
 import { UserService } from '../../user/user.service';
+import { HttpService } from '@nestjs/axios';
+import { firstValueFrom } from 'rxjs';
 
 // Auth0のアクセストークンのClaimインターフェース
 interface Claim {
@@ -27,6 +29,7 @@ export class Auth0Strategy extends PassportStrategy(JwtStrategyBase, 'auth0') {
   constructor(
     private readonly configService: ConfigService,
     private readonly userService: UserService,
+    private readonly httpService: HttpService,
   ) {
     const jwksUri = configService.get<string>('jwt.jwksUri') || '';
     const issuer = configService.get<string>('jwt.issuer') || '';
@@ -66,12 +69,28 @@ export class Auth0Strategy extends PassportStrategy(JwtStrategyBase, 'auth0') {
     } catch {
       /* empty */
     }
-
-    // TODO: メールアドレスをIdPから取得してDBに登録する処理
-
-    // ユーザーが見つからない場合は例外をスロー
+    // UserInfo APIから詳細を取得
     if (!user) {
-      throw new InvalidTokenException();
+      const token = ExtractJwt.fromAuthHeaderAsBearerToken()(req);
+      const issuer = this.configService.get<string>('jwt.issuer'); // 例: https://xxx.auth0.com/
+      try {
+        // Auth0の userinfo エンドポイントへリクエスト
+        const { data } = await firstValueFrom(
+          this.httpService.get<{ email: string }>(`${issuer}userinfo`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+        );
+        const email = data.email;
+        if (!email) throw new UnauthorizedException('Email not found in Auth0');
+
+        // DBに登録/同期
+        user = await this.userService.findOrCreateByExternalId(sub, email);
+      } catch {
+        throw new UnauthorizedException('Failed to fetch user info from Auth0');
+      }
+    }
+    if (!user) {
+      throw new UnauthorizedException('Failed to fetch user info from Auth0');
     }
 
     return {

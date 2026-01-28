@@ -12,7 +12,10 @@ import {
 import { HttpExceptionFilter } from './common/filters';
 import { ErrorResponseDto, SuccessResponseDto } from './common/swagger';
 import { ResponseTransformInterceptor } from './common/interceptors';
-import { CognitoAuthGuard } from './auth/guards';
+import {
+  // Auth0AuthGuard,
+  CognitoAuthGuard,
+} from './auth/guards';
 
 async function bootstrap() {
   // トランザクションコンテキストの初期化（最優先で実行）
@@ -40,6 +43,8 @@ async function bootstrap() {
 
   // CognitoAuthGuard をグローバルガードとして設定
   app.useGlobalGuards(new CognitoAuthGuard(configService, reflector));
+  // // Auth0AuthGuard をグローバルガードとして設定
+  // app.useGlobalGuards(new Auth0AuthGuard(configService, reflector));
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle(configService.get<string>('swagger.title') || 'NestJS API')

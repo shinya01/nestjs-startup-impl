@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy as JwtStrategyBase } from 'passport-jwt';
 import * as jwksRsa from 'jwks-rsa';
@@ -80,6 +80,7 @@ export class CognitoStrategy extends PassportStrategy(
     } catch {
       /* empty */
     }
+    // UserInfo APIから詳細を取得
     if (!user) {
       const client = new CognitoIdentityProviderClient({
         region: 'ap-northeast-1',
@@ -93,20 +94,24 @@ export class CognitoStrategy extends PassportStrategy(
         const email = response.UserAttributes?.find(
           (attr) => attr.Name === 'email',
         )?.Value;
+        if (!email) {
+          throw new UnauthorizedException('Email not found in Congnito');
+        }
         const name =
           response.UserAttributes?.find((attr) => attr.Name === 'name')
             ?.Value || email;
-        if (!email || !name) {
-          throw new InvalidTokenException();
+        if (!name) {
+          throw new UnauthorizedException('Name not found in Congnito');
         }
         user = await this.userService.findOrCreateByExternalId(sub, email);
-      } catch (error) {
-        console.log(error);
-        throw new InvalidTokenException();
+      } catch {
+        throw new UnauthorizedException(
+          'Failed to fetch user info from Cognito',
+        );
       }
     }
     if (!user) {
-      throw new InvalidTokenException();
+      throw new UnauthorizedException('Failed to fetch user info from Cognito');
     }
 
     return {
