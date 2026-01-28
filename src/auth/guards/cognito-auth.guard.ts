@@ -6,15 +6,26 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { ConfigService } from '@nestjs/config';
 import { AuthUser } from '../types';
+import { Reflector } from '@nestjs/core';
+import { IS_PUBLIC_KEY } from '../decorators';
 
 @Injectable()
 export class CognitoAuthGuard extends AuthGuard('cognito') {
-  constructor(private configService: ConfigService) {
+  constructor(
+    private configService: ConfigService,
+    private reflector: Reflector,
+  ) {
     super();
   }
 
   canActivate(context: ExecutionContext) {
-    return super.canActivate(context);
+    // クラス(Controller)またはメソッド(Handler)に@Public()があるかチェック
+    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+    // 公開ルートの場合は認証をパス、それ以外は通常のJWT検証を実行
+    return isPublic ? true : super.canActivate(context);
   }
 
   handleRequest<TUser = AuthUser>(err: any, user: TUser, info: any): TUser {

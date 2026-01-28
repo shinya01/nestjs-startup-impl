@@ -1,12 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Param,
-  Body,
-  Logger,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Logger } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto, UserDto } from './dto';
 import {
@@ -21,13 +13,12 @@ import {
   ApiErrorResponses,
   ApiSuccessResponse,
 } from '../common/decorators';
-import { Auth0AuthGuard } from 'src/auth/guards';
+import { Public } from '../auth/decorators';
 
 @ApiTags('Users')
 @Controller('users')
 @ApiErrorResponses()
 @ApiBearerAuth('access-token')
-@UseGuards(Auth0AuthGuard)
 @ApiAuthErrorResponses()
 export class UserController {
   private readonly logger = new Logger(UserController.name);
@@ -36,6 +27,7 @@ export class UserController {
     this.logger.log('UserController initialized');
   }
 
+  @Public() // 全ユーザー取得のみ公開
   @Get()
   @ApiOperation({ summary: '全ユーザーを取得' })
   @ApiSuccessResponse({ model: UserDto, isArray: true })
