@@ -1,8 +1,8 @@
 import { Controller, Get, Post, Body, Logger } from '@nestjs/common';
 import { ArticleService } from './article.service';
 import { CreateArticleDto, ArticleDto } from './dto';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { ApiErrorResponses } from '../common/decorators';
+import { ApiTags, ApiOperation, ApiBody } from '@nestjs/swagger';
+import { ApiErrorResponses, ApiSuccessResponse } from '../common/decorators';
 
 @ApiTags('Articles')
 @Controller('articles')
@@ -16,14 +16,19 @@ export class ArticleController {
 
   @Get()
   @ApiOperation({ summary: '全記事を取得' })
-  @ApiResponse({ status: 200, type: [ArticleDto] })
+  @ApiSuccessResponse({ model: ArticleDto, isArray: true })
   getAll() {
     return this.articleService.getAll();
   }
 
   @Post()
   @ApiOperation({ summary: '記事を作成' })
-  @ApiResponse({ status: 201, type: ArticleDto })
+  @ApiBody({ type: CreateArticleDto })
+  @ApiSuccessResponse({
+    model: ArticleDto,
+    description: '記事作成成功',
+    statusCode: 201,
+  })
   create(@Body() body: CreateArticleDto) {
     return this.articleService.create(body);
   }
