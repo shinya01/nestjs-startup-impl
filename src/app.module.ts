@@ -9,6 +9,7 @@ import { ENTITIES } from './common/entities';
 import { CommonModule } from './common/common.module';
 import { UserModule } from './user/user.module';
 import { ArticleModule } from './article/article.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -63,6 +64,7 @@ import { ArticleModule } from './article/article.module';
     CommonModule,
     UserModule,
     ArticleModule,
+    AuthModule,
   ],
 })
 export class AppModule {}

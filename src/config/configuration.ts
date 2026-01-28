@@ -2,6 +2,7 @@ export const configuration = () => ({
   app: {
     env: process.env.NODE_ENV || 'development',
     port: parseInt(process.env.PORT || '3000', 10),
+    authDisable: process.env.AUTH_DISABLE === 'true',
   },
   swagger: {
     title: process.env.SWAGGER_TITLE,
@@ -14,5 +15,10 @@ export const configuration = () => ({
     user: process.env.DB_USER,
     pass: process.env.DB_PASS,
     name: process.env.DB_NAME,
+  },
+  jwt: {
+    jwksUri: process.env.JWKS_URI,
+    issuer: process.env.JWT_ISSUER,
+    audience: process.env.JWT_AUDIENCE,
   },
 });
