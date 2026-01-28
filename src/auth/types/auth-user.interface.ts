@@ -1,4 +1,5 @@
 export interface AuthUser {
-  sub: string;
+  userId: number; // アプリDB上のユーザーID
+  sub: string; // 外部IdP上の識別子
   iss: string;
 }

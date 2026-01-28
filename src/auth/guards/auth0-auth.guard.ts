@@ -31,7 +31,7 @@ export class Auth0AuthGuard extends AuthGuard('auth0') {
   handleRequest<TUser = AuthUser>(err: any, user: TUser, info: any): TUser {
     const disableAuth = this.configService.get<boolean>('app.authDisable');
     if (disableAuth) {
-      return { sub: 'dummy-user', iss: 'dummy' } as TUser;
+      return { userId: 1, sub: 'dummy-user', iss: 'dummy' } as TUser;
     }
 
     if (err || !user) {
